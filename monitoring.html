@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring • JKP Party Monitoring</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/monitoring.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">🎉</div>
+        <div>
+          <h2>JKP</h2>
+          <div class="brand-sub">Party Monitor</div>
+        </div>
+      </div>
+      <nav>
+        <a href="dashboard.html">
+          <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span>
+          Dashboard
+        </a>
+        <a href="bookings.html">
+          <span class="nav-icon"><i class="fa-solid fa-calendar-check"></i></span>
+          Bookings
+        </a>
+        <a href="monitoring.html" class="active">
+          <span class="nav-icon"><i class="fa-solid fa-desktop"></i></span>
+          Monitoring
+        </a>
+        <a href="calendar.html">
+          <span class="nav-icon"><i class="fa-regular fa-calendar-days"></i></span>
+          Calendar
+        </a>
+      </nav>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+      </button>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1>Monitoring Board</h1>
+            <div class="topbar-date" id="topbarDate"></div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="action-btn primary" onclick="window.location.href='bookings.html'">
+            <i class="fa-solid fa-plus"></i> New Booking
+          </button>
+          <button class="action-btn secondary" id="refreshBtn">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div id="monitoringContent">
+          <div class="spinner-lg"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="bookingDetailsModal">
+    <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto;">
+      <div id="bookingDetailsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./js/service-worker.js").catch(err => console.log("SW registration failed:", err));
+      });
+    }
+  </script>
+  <script type="module">
+    import { guardPage, logoutUser } from "./js/auth.js";
+    import { loadMonitoring as refreshData } from "./js/monitoring.js";
+
+    guardPage("monitoring.html").then(() => {
+      document.getElementById("topbarDate").textContent =
+        new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+      document.getElementById("menuToggle").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("active");
+      });
+      document.getElementById("sidebarOverlay").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarOverlay").classList.remove("active");
+      });
+
+      const themeToggle = document.createElement("button");
+      themeToggle.className = "theme-toggle";
+      themeToggle.id = "themeToggle";
+      themeToggle.setAttribute("aria-label", "Toggle theme");
+      themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i> <span>Dark</span>';
+      document.querySelector(".topbar-right").appendChild(themeToggle);
+
+      const savedTheme = localStorage.getItem("jkp_theme") || "light";
+
+      function applyTheme(theme) {
+        if (theme === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+          themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i><span>Light</span>';
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+          themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i><span>Dark</span>';
+        }
+      }
+
+      applyTheme(savedTheme);
+      themeToggle.addEventListener("click", () => {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        const newTheme = isDark ? "light" : "dark";
+        applyTheme(newTheme);
+        localStorage.setItem("jkp_theme", newTheme);
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", logoutUser);
+      document.getElementById("refreshBtn").addEventListener("click", () => {
+        refreshData();
+      });
+
+      window.refreshMonitoring = refreshData;
+
+      const content = document.getElementById("monitoringContent");
+    content.innerHTML = `
+      <div class="monitoring-grid" style="margin-bottom:28px;">
+        <div class="monitor-card">
+          <div class="monitor-icon">📅</div>
+          <div class="monitor-number" id="todayCount">0</div>
+          <div class="monitor-label">Today's Parties</div>
+        </div>
+        <div class="monitor-card">
+          <div class="monitor-icon">🔜</div>
+          <div class="monitor-number" id="upcomingCount">0</div>
+          <div class="monitor-label">Upcoming</div>
+        </div>
+        <div class="monitor-card ongoing-pulse">
+          <div class="monitor-icon">🎉</div>
+          <div class="monitor-number" id="ongoingCount">0</div>
+          <div class="monitor-label">Ongoing</div>
+        </div>
+        <div class="monitor-card">
+          <div class="monitor-icon">✅</div>
+          <div class="monitor-number" id="completedCount">0</div>
+          <div class="monitor-label">Completed</div>
+        </div>
+        <div class="monitor-card">
+          <div class="monitor-icon">❌</div>
+          <div class="monitor-number" id="cancelledCount">0</div>
+          <div class="monitor-label">Cancelled</div>
+        </div>
+      </div>
+
+      <div class="dashboard-panels" style="margin-bottom:28px;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-hourglass-half" style="color:var(--jkp-yellow);margin-right:8px;"></i>Next Party</h3>
+          </div>
+          <div id="nextPartyCard"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-door-open" style="color:var(--status-upcoming);margin-right:8px;"></i>Available Rooms</h3>
+          </div>
+          <div id="availableRooms"></div>
+        </div>
+      </div>
+
+      <div id="todaySection" class="monitor-section"></div>
+      <div id="upcomingSection" class="monitor-section"></div>
+      <div id="ongoingSection" class="monitor-section"></div>
+      <div id="completedSection" class="monitor-section"></div>
+      <div id="cancelledSection" class="monitor-section"></div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="panel-header">
+          <h3><i class="fa-solid fa-list" style="color:var(--jkp-red);margin-right:8px;"></i>Daily Schedule Timeline</h3>
+        </div>
+        <div id="dailyTimeline" style="min-height:200px;"><p class="empty-state">Loading...</p></div>
+      </div>
+    `;
+
+      refreshData();
+    });
+  </script>
+</body>
+</html>

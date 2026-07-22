@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar • JKP Party Monitoring</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/monitoring.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .calendar-container {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .calendar-header h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--jkp-dark);
+    }
+    [data-theme="dark"] .calendar-header h3 { color: var(--jkp-text); }
+    .calendar-nav {
+      display: flex;
+      gap: 8px;
+    }
+    .calendar-nav button {
+      background: var(--jkp-gray-light);
+      border: 1.5px solid var(--jkp-gray-mid);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: var(--transition);
+      color: var(--jkp-text);
+    }
+    .calendar-nav button:hover {
+      border-color: var(--jkp-red);
+      color: var(--jkp-red);
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--jkp-gray-mid);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .calendar-header-day {
+      background: var(--jkp-dark);
+      color: var(--jkp-yellow);
+      padding: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .calendar-cell {
+      background: white;
+      min-height: 100px;
+      padding: 8px;
+      position: relative;
+      transition: var(--transition);
+    }
+    .calendar-cell:hover {
+      background: var(--jkp-gray-light);
+    }
+    .calendar-cell.empty {
+      background: var(--jkp-gray-light);
+    }
+    .calendar-cell.today-highlight {
+      background: rgba(255,199,44,0.1);
+    }
+    .calendar-day-number {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--jkp-text);
+      margin-bottom: 6px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    .calendar-day-number.today {
+      background: var(--jkp-red);
+      color: white;
+    }
+    .calendar-bookings {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .calendar-booking-item {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: var(--transition);
+    }
+    .calendar-booking-item:hover {
+      transform: translateX(2px);
+    }
+    .calendar-booking-time {
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--jkp-text-muted);
+    }
+    .calendar-booking-info strong {
+      display: block;
+      font-size: 11px;
+      color: var(--jkp-text);
+    }
+    .calendar-booking-info span {
+      font-size: 10px;
+      color: var(--jkp-text-muted);
+    }
+
+    [data-theme="dark"] .calendar-container { background: var(--jkp-dark); border: 1px solid var(--jkp-gray-mid); }
+    [data-theme="dark"] .calendar-cell { background: var(--jkp-dark); }
+    [data-theme="dark"] .calendar-cell:hover { background: var(--jkp-dark-soft); }
+    [data-theme="dark"] .calendar-cell.empty { background: var(--jkp-dark); }
+    [data-theme="dark"] .calendar-day-number { color: var(--jkp-text); }
+    [data-theme="dark"] .calendar-booking-info strong { color: var(--jkp-text); }
+
+    @media (max-width: 768px) {
+      .calendar-cell { min-height: 70px; padding: 4px; }
+      .calendar-booking-item { font-size: 9px; padding: 3px 4px; }
+      .calendar-day-number { font-size: 11px; width: 22px; height: 22px; }
+      .calendar-header-day { padding: 8px 4px; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">🎉</div>
+        <div>
+          <h2>JKP</h2>
+          <div class="brand-sub">Party Monitor</div>
+        </div>
+      </div>
+      <nav>
+        <a href="dashboard.html">
+          <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span>
+          Dashboard
+        </a>
+        <a href="bookings.html">
+          <span class="nav-icon"><i class="fa-solid fa-calendar-check"></i></span>
+          Bookings
+        </a>
+        <a href="monitoring.html">
+          <span class="nav-icon"><i class="fa-solid fa-desktop"></i></span>
+          Monitoring
+        </a>
+        <a href="calendar.html" class="active">
+          <span class="nav-icon"><i class="fa-regular fa-calendar-days"></i></span>
+          Calendar
+        </a>
+      </nav>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+      </button>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1>Calendar</h1>
+            <div class="topbar-date" id="topbarDate"></div>
+          </div>
+        <div class="topbar-right">
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <h3 id="calendarMonth">July 2026</h3>
+            <div class="calendar-nav">
+              <button id="prevMonth"><i class="fa-solid fa-chevron-left"></i></button>
+              <button id="todayBtn">Today</button>
+              <button id="nextMonth"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="bookingDetailsModal">
+    <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto;">
+      <div id="bookingDetailsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./js/service-worker.js").catch(err => console.log("SW registration failed:", err));
+      });
+    }
+  </script>
+  <script type="module">
+    import { guardPage, logoutUser } from "./js/auth.js";
+    import { loadCalendarBookings, renderCalendar } from "./js/calendar.js";
+
+    guardPage("calendar.html").then(() => {
+      document.getElementById("topbarDate").textContent =
+        new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+      document.getElementById("menuToggle").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarOverlay").classList.toggle("active");
+      });
+      document.getElementById("sidebarOverlay").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarOverlay").classList.remove("active");
+      });
+
+      const themeToggle = document.createElement("button");
+      themeToggle.className = "theme-toggle";
+      themeToggle.id = "themeToggle";
+      themeToggle.setAttribute("aria-label", "Toggle theme");
+      themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i> <span>Dark</span>';
+      document.querySelector(".topbar-right").appendChild(themeToggle);
+
+      const savedTheme = localStorage.getItem("jkp_theme") || "light";
+
+      function applyTheme(theme) {
+        if (theme === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+          themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i><span>Light</span>';
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+          themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i><span>Dark</span>';
+        }
+      }
+
+      applyTheme(savedTheme);
+      themeToggle.addEventListener("click", () => {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        const newTheme = isDark ? "light" : "dark";
+        applyTheme(newTheme);
+        localStorage.setItem("jkp_theme", newTheme);
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", logoutUser);
+
+      let currentYear = new Date().getFullYear();
+      let currentMonth = new Date().getMonth();
+
+    async function loadCalendar() {
+      const bookings = await loadCalendarBookings(currentYear, currentMonth);
+      renderCalendar(currentYear, currentMonth, bookings);
+    }
+
+    document.getElementById("prevMonth").addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      loadCalendar();
+    });
+    document.getElementById("nextMonth").addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      loadCalendar();
+    });
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      currentYear = new Date().getFullYear();
+      currentMonth = new Date().getMonth();
+      loadCalendar();
+    });
+
+    loadCalendar();
+    });
+  </script>
+</body>
+</html>

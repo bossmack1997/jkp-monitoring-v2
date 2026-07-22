@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JKP Party Monitoring</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="bg-shapes">
+    <div class="floating-icon">🎉</div>
+    <div class="floating-icon">🎂</div>
+    <div class="floating-icon">🥳</div>
+    <div class="floating-icon">🎈</div>
+    <div class="floating-icon">🎁</div>
+  </div>
+
+  <section class="landing">
+    <div class="landing-content">
+      <div class="landing-badge">
+        <i class="fa-solid fa-star"></i> JKP Party Monitoring v3
+      </div>
+      <h1>Manage Parties <span>Like a Pro</span></h1>
+      <p>
+        The smartest way to track bookings, manage schedules, and celebrate every moment.
+        Built for JKP's amazing party experience.
+      </p>
+      <div class="landing-btns">
+        <a href="login.html" class="btn-landing primary">
+          <i class="fa-solid fa-rocket"></i> Get Started
+        </a>
+        <a href="login.html" class="btn-landing outline">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Login to Dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer style="position:absolute;bottom:0;width:100%;text-align:center;padding:16px;font-size:12px;color:rgba(255,255,255,0.6);">
+    &copy; 2026 JKP Party Monitoring. All rights reserved.
+  </footer>
+
+  <script>
+    document.querySelectorAll('.btn-landing').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+
+  <style>
+    .floating-icon {
+      position: absolute;
+      font-size: 50px;
+      opacity: 0.12;
+      animation: floatIcon 25s infinite ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .floating-icon:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+    .floating-icon:nth-child(2) { top: 60%; right: 12%; animation-delay: -5s; font-size: 60px; }
+    .floating-icon:nth-child(3) { top: 25%; right: 20%; animation-delay: -10s; font-size: 40px; }
+    .floating-icon:nth-child(4) { bottom: 20%; left: 15%; animation-delay: -15s; font-size: 55px; }
+    .floating-icon:nth-child(5) { top: 40%; left: 50%; animation-delay: -20s; font-size: 35px; }
+
+    @keyframes floatIcon {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(40px, -50px) rotate(10deg); }
+      50% { transform: translate(-30px, 30px) rotate(-10deg); }
+      75% { transform: translate(50px, 40px) rotate(5deg); }
+    }
+  </style>
+</body>
+</html>
