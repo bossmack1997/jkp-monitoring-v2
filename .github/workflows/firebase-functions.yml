@@ -1,18 +1,25 @@
-name: Deploy Firebase Functions
+name: Deploy to Firebase Hosting
+
 on:
   push:
-    branches: [main]
-    paths: ['cloud-functions/**']
+    branches:
+      - main
+
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: cd cloud-functions && npm install
-      - uses: FirebaseExtended/action-hosting-deploy@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JKP_MONITORING }}
+          channelId: live
           projectId: jkp-monitoring
